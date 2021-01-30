@@ -17,6 +17,10 @@ import (
 	"github.com/cdm/post-to-socials/connector"
 )
 
+type Result struct {
+	Code string `json:"code"`
+}
+
 func getAuthHeaders(r *http.Request) (key string, secret string) {
 	k := r.Header.Get("k")
 	s := r.Header.Get("s")
@@ -28,10 +32,11 @@ func getNanoTime() string {
 	return fmt.Sprintf("%d", now.UnixNano())
 }
 
-
 func writeResult(w http.ResponseWriter, status string) {
 	w.Header().Set("Content-Type", "application/json")
-	result := struct { status string }{  status }
+	result := Result {
+		 Code: status,
+	}
 	payload, err := json.Marshal(result)
 	if err != nil {
 		log.WithError(err).Error("Error marshaling response")
@@ -86,8 +91,10 @@ func startService(conf ConfigVars, creds map[string]string) {
 		telegram.Send("Hello Telegram " + getNanoTime())
 	})
 	router.HandleFunc("/send/all", func(w http.ResponseWriter, r *http.Request) {
+		log.Infof("send all")
 		key, secret := getAuthHeaders(r)
-		if creds[key] != secret {
+		if len(key) == 0 || len(secret) == 0 || creds[key] != secret {
+			log.Debugf("auth err")
 			writeResult(w, "auth_error")
 		} else {
 			writeResult(w, "success")

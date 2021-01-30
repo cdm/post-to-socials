@@ -15,7 +15,7 @@ func main() {
 	// Config
 	conf, err := ReadConfig("config.yaml")
 	if err != nil {
-		log.Fatal("Failed to read config", err)
+		log.Fatal("Failed to read config: ", err)
 	}
 
 	if len(conf.Host) <= 0 {
