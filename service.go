@@ -49,7 +49,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 	log.Infof("Starting post-to-socials API service (%s:%s)", conf.Host, conf.Port)
 
 	discord := connector.NewDiscordConnector(
-		conf.DiscordChannel, conf.BotName)
+		conf.DiscordChannel, conf.DiscordBotToken, conf.DiscordGuildID)
 	twitter := connector.NewTwitterConnector(
 		conf.TwitterConsumerKey, conf.TwitterConsumerSecret,
 		conf.TwitterAccessTokenKey, conf.TwitterAccessTokenSecret)
@@ -91,10 +91,10 @@ func startService(conf ConfigVars, creds map[string]string) {
 		telegram.Send("Hello Telegram " + getNanoTime())
 	})
 	router.HandleFunc("/send/all", func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("send all")
+		log.Debug("/send/all")
 		key, secret := getAuthHeaders(r)
 		if len(key) == 0 || len(secret) == 0 || creds[key] != secret {
-			log.Debugf("auth err")
+			log.Debug("auth error")
 			writeResult(w, "auth_error")
 		} else {
 			writeResult(w, "success")

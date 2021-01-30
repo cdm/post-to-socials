@@ -5,16 +5,16 @@ import "github.com/ilyakaznacheev/cleanenv"
 type ConfigVars struct {
 	Port                      string `yaml:"port" env:"PORT" env-default:"5432"`
 	Host                      string `yaml:"host" env:"HOST" env-default:"localhost"`
-	BotName                   string `yaml:"name" env:"BOTNAME" env-default:"Mixel"`
 	CredentialFilePath        string `yaml:"csv" env:"CSV" env-default:"auth.csv"`
-	TwitterConsumerKey        string `yaml:"twitterConsumerKey" env:"TCK" env-default:""`
-	TwitterConsumerSecret     string `yaml:"twitterConsumerSecret" env:"TCS" env-default:""`
-	TwitterAccessTokenKey     string `yaml:"twitterAccessTokenKey" env:"TATK" env-default:""`
-	TwitterAccessTokenSecret  string `yaml:"twitterAccessTokenSecret" env:"TATS" env-default:""`
-	TelegramChatIdentifier    string `yaml:"telegramChatId" env:"TCI" env-default:""`
-	TelegramBotToken          string `yaml:"telegramBotToken" env:"TBT" env-default:""`
-	DiscordChannel            string `yaml:"discordChannel" env:"DCH" env-default:""`
-	DiscordToken              string `yaml:"discordToken" env:"DTOK" env-default:""`
+	TwitterConsumerKey        string `yaml:"twitterConsumerKey" env:"TWITTER-CK" env-default:""`
+	TwitterConsumerSecret     string `yaml:"twitterConsumerSecret" env:"TWITTER-CS" env-default:""`
+	TwitterAccessTokenKey     string `yaml:"twitterAccessTokenKey" env:"TWITTER-ATK" env-default:""`
+	TwitterAccessTokenSecret  string `yaml:"twitterAccessTokenSecret" env:"TWITTER-ATS" env-default:""`
+	TelegramChatIdentifier    string `yaml:"telegramChatId" env:"TELEGRAM-CHAT-IDENTIFIER" env-default:""`
+	TelegramBotToken          string `yaml:"telegramBotToken" env:"TELEGRAM-TOKEN" env-default:""`
+	DiscordGuildID            string `yaml:"discordGuildId" env:"DISCORD-GUILD-ID" env-default:""`
+	DiscordChannel            string `yaml:"discordChannel" env:"DISCORD-CHANNEL" env-default:""`
+	DiscordBotToken           string `yaml:"discordBotToken" env:"DISCORD-TOKEN" env-default:""`
 }
 
 //"config.yml"
