@@ -30,7 +30,7 @@ func (t *Telegram) Send(msg string) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	log.Debugf("Sending Telegram message `%s` to chat_id: %s", msg, t.chatID)
+	log.Infof("Sending Telegram message `%s` to chat_id: %s", msg, t.chatID)
 
 	telegramApi := "https://api.telegram.org/bot" + t.botToken + "/sendMessage"
 	response, err := http.PostForm(
@@ -50,6 +50,6 @@ func (t *Telegram) Send(msg string) error {
 	}
 	bodyString := string(bodyBytes)
 
-	log.Printf("Body of Telegram Response: %s", bodyString)
+	log.Infof("Body of Telegram Response: %s", bodyString)
 	return nil
 }

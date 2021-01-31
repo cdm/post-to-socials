@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,6 +18,10 @@ import (
 
 type Result struct {
 	Code string `json:"code"`
+}
+
+type SendMessage struct {
+	Msg string `json:"msg"`
 }
 
 func getAuthHeaders(r *http.Request) (key string, secret string) {
@@ -45,59 +48,124 @@ func writeResult(w http.ResponseWriter, status string) {
 	}
 }
 
+func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (bool, string) {
+	if r.Method != http.MethodPost {
+		writeResult(w, "method_error")
+		return false, ""
+	}
+
+	key, secret := getAuthHeaders(r)
+	if len(key) == 0 || len(secret) == 0 || creds[key] != secret {
+		writeResult(w, "auth_error")
+		return false, ""
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var m SendMessage
+	err := decoder.Decode(&m)
+	if err != nil {
+		log.Errorf("Error decoding msg body: %s", err.Error())
+		writeResult(w, "json_error")
+		return false, ""
+	}
+
+	if len(m.Msg) > 140 || len(m.Msg) == 0 {
+		log.Errorf("Error msg body is out of range: %d >> %s", len(m.Msg), m.Msg)
+		writeResult(w, "json_error")
+		return false, ""
+	}
+
+	return true, m.Msg
+}
+
 func startService(conf ConfigVars, creds map[string]string) {
 	log.Infof("Starting post-to-socials API service (%s:%s)", conf.Host, conf.Port)
 
 	discord := connector.NewDiscordConnector(
-		conf.DiscordChannel, conf.DiscordBotToken, conf.DiscordGuildID)
+		conf.DiscordChannel,
+		conf.DiscordBotToken,
+		conf.DiscordGuildID,
+	)
 	twitter := connector.NewTwitterConnector(
-		conf.TwitterConsumerKey, conf.TwitterConsumerSecret,
-		conf.TwitterAccessTokenKey, conf.TwitterAccessTokenSecret)
-	telegram := connector.NewTelegramConnector(conf.TelegramBotToken, conf.TelegramChatIdentifier)
+		conf.TwitterConsumerKey,
+		conf.TwitterConsumerSecret,
+		conf.TwitterAccessTokenKey,
+		conf.TwitterAccessTokenSecret,
+	)
+	telegram := connector.NewTelegramConnector(
+		conf.TelegramBotToken,
+		conf.TelegramChatIdentifier,
+	)
 
 	router := mux.NewRouter()
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		symbols := []string{
-			"AAPL",
-			"MSFT",
-			"AMZN",
-			"GOOG",
-			"TSLA",
-			"FB",
-			"NFLX",
-			"PYPL",
-			"INTC",
-		}
-		rand.Seed(time.Now().Unix())
-		w.Write([]byte(symbols[rand.Intn(len(symbols))]))
-	})
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
 	router.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {})
 	router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
-		//key, secret := getAuthHeaders(r)
-		log.Debug("/send/twitter")
-
-		twitter.Send("Hello Twitter " + getNanoTime())
+		log.Info("/send/twitter")
+		valid, msg := validate(w, r, creds)
+		if valid {
+			err := twitter.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Twitter: %s", err.Error())
+				writeResult(w, "send_error")
+			} else {
+				writeResult(w, "success")
+			}
+		}
 	})
 	router.HandleFunc("/send/discord", func(w http.ResponseWriter, r *http.Request) {
-		//key, secret := getAuthHeaders(r)
-		log.Debug("/send/discord")
-
-		discord.Send("Hello Discord " + getNanoTime())
+		log.Info("/send/discord")
+		valid, msg := validate(w, r, creds)
+		if valid {
+			err := discord.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Discord: %s", err.Error())
+				writeResult(w, "send_error")
+			} else {
+				writeResult(w, "success")
+			}
+		}
 	})
 	router.HandleFunc("/send/telegram", func(w http.ResponseWriter, r *http.Request) {
-		//key, secret := getAuthHeaders(r)
-		log.Debug("/send/telegram")
-
-		telegram.Send("Hello Telegram " + getNanoTime())
+		log.Info("/send/telegram")
+		valid, msg := validate(w, r, creds)
+		if valid {
+			err := telegram.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Telegram: %s", err.Error())
+				writeResult(w, "send_error")
+			} else {
+				writeResult(w, "success")
+			}
+		}
 	})
 	router.HandleFunc("/send/all", func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("/send/all")
-		key, secret := getAuthHeaders(r)
-		if len(key) == 0 || len(secret) == 0 || creds[key] != secret {
-			log.Debug("auth error")
-			writeResult(w, "auth_error")
-		} else {
-			writeResult(w, "success")
+		log.Info("/send/all")
+		valid, msg := validate(w, r, creds)
+		if valid {
+			errors := 0
+			err := discord.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Discord: %s", err.Error())
+				errors++
+			}
+			err = nil
+			err = telegram.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Telegram: %s", err.Error())
+				errors++
+			}
+			err = nil
+			err = twitter.Send(msg)
+			if err != nil {
+				log.Errorf("Error sending msg to Twitter: %s", err.Error())
+				errors++
+			}
+			if errors > 0 {
+				writeResult(w, "send_error")
+			} else {
+				writeResult(w, "success")
+			}
 		}
 	})
 

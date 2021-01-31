@@ -29,6 +29,9 @@ func NewDiscordConnector(channelName string, botToken string, botGuildID string)
 
 // Start the Discord connector
 func (d *Discord) Start() error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	if d.session != nil {
 		log.Warn("Discord service already started")
 		return nil
