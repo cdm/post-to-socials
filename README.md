@@ -25,8 +25,8 @@ csv => Path to csv of authentication key/secret pairs e.g. "csv/auth.csv"
 
 twitterConsumerKey       => Twitter API consumer key e.g. "xgtOU2XljrxBBQuWzkWfe4ebp"
 twitterConsumerSecret    => Twitter API consumer secret e.g. "HMcXX73htvoe73mS2NR2cY9aag3r9D8CmbJtAlMPEfXRD1Qucp" 
-twitterAccessTokenKey    => Twitter API access token e.g. ""
-twitterAccessTokenSecret => Twitter API access token secret e.g. ""
+twitterAccessTokenKey    => Twitter API access token e.g. "1355884211619828228-NjPbG8kFxVUxjqMWFsPfS7CKfT3vOM"
+twitterAccessTokenSecret => Twitter API access token secret e.g. "e2E1iLEWGqL1JMB0oQIPsH1omEyalXj9hcRHi6jAMyGaC"
 
 telegramChatId   => Telegram chat identifier to post to e.g. "-1991156818728"
 telegramBotToken => Telegram bot token e.g. "1441979128:AKKpe6CDKXoChpQ2KJ-fwej6F2qjjhbmdNA"
@@ -46,10 +46,10 @@ Once built and configured, run the service binary using the following command:
 
 To send a message, construct a JSON POST message to send with the following HTTP headers:
 
-`key` => Post to socials API authentication key  
-`secret` => Post to socials API authentication secret
+`key` => Post to socials API authentication key (from auth.csv file)  
+`secret` => Post to socials API authentication secret (from auth.csv file)  
 
-The message body should include the text:
+The message body should include the JSON body content as follows:
 ```
 {"message":"Your message body here, max 140 characters :)"}
 ```
@@ -70,7 +70,7 @@ Please see the different API methods in the next section for your choice of netw
 
 ### Test form
 
-Available for convenience of testing, uses the API defined above. Accessible at `/send`:
+Available for convenience of testing, uses the API defined above. Accessible in a web browser at `/send`:
 
 <img src="https://i.postimg.cc/fb0wygJH/Screenshot-2021-02-01-at-20-38-17.png" width="400"/>
 
