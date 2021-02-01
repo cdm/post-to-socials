@@ -1,16 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cdm/post-to-socials/connector"
@@ -21,12 +26,12 @@ type Result struct {
 }
 
 type SendMessage struct {
-	Msg string `json:"msg"`
+	Msg string `json:"message"`
 }
 
 func getAuthHeaders(r *http.Request) (key string, secret string) {
-	k := r.Header.Get("k")
-	s := r.Header.Get("s")
+	k := r.Header.Get("key")
+	s := r.Header.Get("secret")
 	return k, s
 }
 
@@ -55,7 +60,20 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 	}
 
 	key, secret := getAuthHeaders(r)
-	if len(key) == 0 || len(secret) == 0 || creds[key] != secret {
+	log.Info("key: " + key)
+	log.Info("secret: " + secret)
+
+	if len(key) == 0 || len(secret) == 0 {
+		writeResult(w, "auth_error")
+		return false, ""
+	}
+
+	if _, ok := creds[key]; !ok {
+		writeResult(w, "auth_error")
+		return false, ""
+	}
+
+	if creds[key] != secret {
 		writeResult(w, "auth_error")
 		return false, ""
 	}
@@ -70,12 +88,36 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 	}
 
 	if len(m.Msg) > 140 || len(m.Msg) == 0 {
-		log.Errorf("Error msg body is out of range: %d >> %s", len(m.Msg), m.Msg)
+		log.Errorf("Error msg body is out of range: %d >> '%s'", len(m.Msg), m.Msg)
 		writeResult(w, "json_error")
 		return false, ""
 	}
 
 	return true, m.Msg
+}
+
+func postMessage(key string, secret string, msg string, path string) (error, string) {
+	var jsonStr = []byte(`{"message":"` + msg + `"}`)
+	req, err := http.NewRequest("POST", "http://" + path, bytes.NewBuffer(jsonStr))
+	req.Header.Set("key", key)
+	req.Header.Set("secret", secret)
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err, ""
+	}
+	defer resp.Body.Close()
+
+	body := ""
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		body = string(bodyBytes)
+	}
+	return nil, body
 }
 
 func startService(conf ConfigVars, creds map[string]string) {
@@ -166,6 +208,76 @@ func startService(conf ConfigVars, creds map[string]string) {
 			} else {
 				writeResult(w, "success")
 			}
+		}
+	})
+	router.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			key := r.FormValue("key")
+			secret := r.FormValue("secret")
+			message := r.FormValue("message")
+			discord := r.FormValue("discord")
+			twitter := r.FormValue("twitter")
+			telegram := r.FormValue("telegram")
+
+			if len(discord) == 0 && len(twitter) == 0 && len(telegram) == 0 {
+				writeResult(w, "network_required_error")
+				return
+			}
+			if len(key) == 0 || len(secret) == 0 {
+				writeResult(w, "auth_required_error")
+				return
+			}
+			if len(message) == 0 || len(message) > 140 {
+				writeResult(w, "message_length_error")
+				return
+			}
+
+			responseContent := ""
+			if len(discord) > 0 && discord == "discord" {
+				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/discord")
+				if err != nil {
+					log.Error(errors.Wrap(err, "Error posting to Discord endpoint on service"))
+					writeResult(w, "post_error")
+					return
+				}
+				responseContent = body
+			}
+
+			if len(twitter) > 0 && twitter == "twitter" {
+				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/twitter")
+				if err != nil {
+					log.Error(errors.Wrap(err, "Error posting to Twitter endpoint on service"))
+					writeResult(w, "post_error")
+					return
+				}
+				responseContent = body
+			}
+
+			if len(telegram) > 0 && telegram == "telegram" {
+				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/telegram")
+				if err != nil {
+					log.Error(errors.Wrap(err, "Error posting to telegram endpoint on service"))
+					writeResult(w, "post_error")
+					return
+				}
+				responseContent = body
+			}
+
+			if strings.Contains(responseContent, "success") {
+				writeResult(w, "post_success")
+			} else {
+				errText := "unknown_error"
+				re := regexp.MustCompile("\\{\"code\":\"(.*?)\"\\}")
+				res := re.FindAllStringSubmatch(responseContent, 1)
+				for i := range res {
+					log.Info("Error code from API:", res[i][1])
+					errText = res[i][1]
+				}
+				writeResult(w, errText)
+			}
+		} else {
+			// Serve up html
+			http.ServeFile(w, r, "form.html")
 		}
 	})
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<title> &#128227; Post to socials - Tester</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+<body class="w-100 sans-serif bg-white">
+<main>
+    <div data-name="component">
+        <form class="pa4 black-80" method="post">
+            <h1 class="f1">Post to socials</h1>
+            <div class="measure">
+                <label for="key" class="f6 b db mb2">Auth Key <span class="normal black-60">(required)</span></label>
+                <input name="key" id="key" class="input-reset ba b--black-20 pa2 mb2 db w-100" type="password">
+                <label for="secret" class="f6 b db mb2">Auth Secret <span class="normal black-60">(required)</span></label>
+                <input name="secret" id="secret" class="input-reset ba b--black-20 pa2 mb2 db w-100" type="password">
+            </div>
+            <br/>
+            <div>
+                <label for="message" class="f6 b db mb2">Message <span class="normal black-60">(required)</span></label>
+                <textarea id="message" name="message" class="db border-box hover-black w-100 measure ba b--black-20 pa2 br2 mb2" aria-describedby="message-desc"></textarea>
+                <small id="message-desc" class="f6 black-60">Maximum 140 chars</small>
+            </div>
+            <br/>
+            <fieldset id="social_networks" class="bn">
+                <div class="flex items-center mb2">
+                    <input class="mr2" type="checkbox" id="telegram" name="telegram" value="telegram" checked aria-checked="true">
+                    <label for="telegram" class="lh-copy">Send to Telegram</label>
+                </div>
+                <div class="flex items-center mb2">
+                    <input class="mr2" type="checkbox" id="discord" name="discord" value="discord" checked aria-checked="true">
+                    <label for="discord" class="lh-copy">Send to Discord</label>
+                </div>
+                <div class="flex items-center mb2">
+                    <input class="mr2" type="checkbox" id="twitter" name="twitter" value="twitter" checked aria-checked="true">
+                    <label for="twitter" class="lh-copy">Send to Twitter</label>
+                </div>
+            </fieldset>
+            <br/>
+            <div>
+                <input class="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>
