@@ -20,7 +20,7 @@ docker_push: docker_build ## Push docker image to github image registry
 
 #.PHONY: docker_run
 #docker_run: ## Run docker image
-#	@docker run -d --name=${CONTAINER} -p 8333:8333 -v "$${PWD}/creds.csv:/creds.csv" "${IMAGE}" -addr=0.0.0.0:8333 -endpoint=https://server.example.com/send -whitelist=...
+#	@docker run -d --name=${CONTAINER} -p 8333:8333 -v "$${PWD}/csv/auth.csv:/csv/auth.csv" "${IMAGE}" -addr=0.0.0.0:8333 -endpoint=https://server.example.com/send ...
 
 .PHONY: docker_stop
 docker_stop: ## Stop docker container
@@ -43,7 +43,7 @@ build: ## Build (dynamic) binary
 
 .PHONY: build-static
 build-static: # Build static binary
-	@env CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o topgun-service .
+	@env CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o post-to-socials .
 
 .PHONY: test
 test: ## Run tests
