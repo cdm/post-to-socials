@@ -12,15 +12,15 @@ import (
 
 type Telegram struct {
 	botToken string
-	chatID string
-	mu sync.Mutex
+	chatID   string
+	mu       sync.Mutex
 }
 
 // Create a new instance of the Telegram connector
 func NewTelegramConnector(botToken string, chatID string) *Telegram {
 	conn := &Telegram{
 		botToken: botToken,
-		chatID: chatID,
+		chatID:   chatID,
 	}
 	return conn
 }

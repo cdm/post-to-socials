@@ -9,19 +9,19 @@ import (
 )
 
 type Discord struct {
-   session *dg.Session
-   channel string
-   channelID string
-   botToken string
-   botGuildID string
-   mu sync.Mutex
+	session    *dg.Session
+	channel    string
+	channelID  string
+	botToken   string
+	botGuildID string
+	mu         sync.Mutex
 }
 
 // Create a new instance of the Discord connector
 func NewDiscordConnector(channelName string, botToken string, botGuildID string) *Discord {
 	conn := &Discord{
-		channel: channelName,
-		botToken: botToken,
+		channel:    channelName,
+		botToken:   botToken,
 		botGuildID: botGuildID,
 	}
 	return conn
@@ -40,7 +40,7 @@ func (d *Discord) Start() error {
 
 	session, err := dg.New("Bot " + d.botToken)
 	if err != nil {
-		return errors.Wrap(err,"Could not create Discord session")
+		return errors.Wrap(err, "Could not create Discord session")
 	}
 
 	session.Identify.Intents = dg.IntentsGuilds | dg.IntentsGuildMessages
@@ -51,7 +51,7 @@ func (d *Discord) Start() error {
 	// Open a websocket connection to Discord and begin listening
 	err = d.session.Open()
 	if err != nil {
-		return errors.Wrap(err,"Could not open Discord connection")
+		return errors.Wrap(err, "Could not open Discord connection")
 	}
 
 	log.Info("Discord connector started")

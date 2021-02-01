@@ -70,9 +70,15 @@ Please see the different API methods in the next section for your choice of netw
 
 ### Test form
 
-Available for convenience of testing, uses the API defined above. Accessible at `/send`.
+Available for convenience of testing, uses the API defined above. Accessible at `/send`:
 
-<img src="https://i.postimg.cc/fb0wygJH/Screenshot-2021-02-01-at-20-38-17.png" width="400">
+<img src="https://i.postimg.cc/fb0wygJH/Screenshot-2021-02-01-at-20-38-17.png" width="400"/>
+
+### CSV auth file
+
+A very simple unencrypted key store, one line per key/secret pair. For example:
+
+<img src="https://i.postimg.cc/nzyTZrNR/Screenshot-2021-02-01-at-21-00-29.png" width="600"/>
 
 ## Contributing
 

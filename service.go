@@ -42,8 +42,8 @@ func getNanoTime() string {
 
 func writeResult(w http.ResponseWriter, status string) {
 	w.Header().Set("Content-Type", "application/json")
-	result := Result {
-		 Code: status,
+	result := Result{
+		Code: status,
 	}
 	payload, err := json.Marshal(result)
 	if err != nil {
@@ -98,7 +98,7 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 
 func postMessage(key string, secret string, msg string, path string) (error, string) {
 	var jsonStr = []byte(`{"message":"` + msg + `"}`)
-	req, err := http.NewRequest("POST", "http://" + path, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", "http://"+path, bytes.NewBuffer(jsonStr))
 	req.Header.Set("key", key)
 	req.Header.Set("secret", secret)
 	req.Header.Set("Content-Type", "application/json")
@@ -234,7 +234,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 
 			responseContent := ""
 			if len(discord) > 0 && discord == "discord" {
-				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/discord")
+				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/discord")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to Discord endpoint on service"))
 					writeResult(w, "post_error")
@@ -244,7 +244,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			}
 
 			if len(twitter) > 0 && twitter == "twitter" {
-				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/twitter")
+				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/twitter")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to Twitter endpoint on service"))
 					writeResult(w, "post_error")
@@ -254,7 +254,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			}
 
 			if len(telegram) > 0 && telegram == "telegram" {
-				err, body := postMessage(key, secret, message, conf.Host + ":" + conf.Port + "/send/telegram")
+				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/telegram")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to telegram endpoint on service"))
 					writeResult(w, "post_error")

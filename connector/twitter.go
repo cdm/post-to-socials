@@ -30,21 +30,21 @@ type User struct {
 }
 
 type Twitter struct {
-	mu sync.Mutex
-	consumerKey string
-	consumerSecret string
-	accessTokenKey string
+	mu                sync.Mutex
+	consumerKey       string
+	consumerSecret    string
+	accessTokenKey    string
 	accessTokenSecret string
 }
 
 // Create a new instance of the Twitter connector
 func NewTwitterConnector(
-		consumerKey string, consumerSecret string,
-		accessTokenKey string, accessTokenSecret string) *Twitter {
+	consumerKey string, consumerSecret string,
+	accessTokenKey string, accessTokenSecret string) *Twitter {
 	conn := &Twitter{
-		consumerKey: consumerKey,
-		consumerSecret: consumerSecret,
-		accessTokenKey: accessTokenKey,
+		consumerKey:       consumerKey,
+		consumerSecret:    consumerSecret,
+		accessTokenKey:    accessTokenKey,
 		accessTokenSecret: accessTokenSecret,
 	}
 	return conn
@@ -66,7 +66,7 @@ func (t *Twitter) Send(msg string) error {
 // Sends a Tweet by the authenticated account (max 140 chars)
 func (t *Twitter) sendTweet(tweet string) (*Tweet, error) {
 	params := url.Values{}
-	params.Set("status",tweet)
+	params.Set("status", tweet)
 
 	client := t.oauthClient()
 	resp, err := client.PostForm("https://api.twitter.com/1.1/statuses/update.json", params)
@@ -85,7 +85,7 @@ func (t *Twitter) sendTweet(tweet string) (*Tweet, error) {
 }
 
 // Creates an OAuth client with specified consumer keys and access tokens
-func (t *Twitter)  oauthClient() *http.Client {
+func (t *Twitter) oauthClient() *http.Client {
 	config := oauth1.NewConfig(t.consumerKey, t.consumerSecret)
 	token := oauth1.NewToken(t.accessTokenKey, t.accessTokenSecret)
 	return config.Client(oauth1.NoContext, token)
