@@ -36,6 +36,9 @@ discordChannel  => Discord channel to post to e.g. "bot-playground"
 discordBotToken => Discord bot token e.g "XD1MTE2MzkyMDE3NDk0MDE2.YFFNEg.14wlVKNs5ITFgDLzT3N-bffOIsE" 
 ```
 
+To help with deployment on cloud hosting providers, the config also supports Environment (ENV) variables. 
+The named ENV vars are shown directly in the [configuration source code](https://github.com/cdm/post-to-socials/blob/d19b00279aa2c88ed5c7ee45a701869799e06ecd/config.go#L6).
+
 ## Usage
 
 Once built and configured, run the service binary using the following command:
