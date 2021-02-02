@@ -18,10 +18,6 @@ func main() {
 		log.Fatal("Failed to read config: ", err)
 	}
 
-	if len(conf.Host) <= 0 {
-		log.Printf("Error: missing 'host' config (the address to bind the accounts service to)")
-		return
-	}
 	if len(conf.Port) <= 0 {
 		log.Printf("Error: missing 'port' config (the address to bind the accounts service to)")
 		return

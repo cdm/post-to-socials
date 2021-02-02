@@ -4,7 +4,7 @@ import "github.com/ilyakaznacheev/cleanenv"
 
 type ConfigVars struct {
 	Port                     string `yaml:"port" env:"PORT" env-default:"5432"`
-	Host                     string `yaml:"host" env:"HOST" env-default:"localhost"`
+	Host                     string `yaml:"host" env:"HOST" env-default:""`
 	CredentialFilePath       string `yaml:"csv" env:"CSV" env-default:"auth.csv"`
 	TwitterConsumerKey       string `yaml:"twitterConsumerKey" env:"TWITTER-CK" env-default:""`
 	TwitterConsumerSecret    string `yaml:"twitterConsumerSecret" env:"TWITTER-CS" env-default:""`

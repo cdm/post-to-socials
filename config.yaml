@@ -1,0 +1,21 @@
+# Service
+host: "localhost"
+port: 8080
+
+# Auth
+csv: "csv/auth.csv"
+
+# Twitter
+twitterConsumerKey: "xgtOU2XljrxALQu2dAWfe4ebp"
+twitterConsumerSecret: "HM8dsd73htvoe79mS2NR2cY9zpp9j9D8CmbJtAlMPEfXRD1Qucp"
+twitterAccessTokenKey: "1355899120619898228-NjPbG8kFxVUkjqMfHGPfS7CKfT3vOM"
+twitterAccessTokenSecret: "e2E1iLD1RqL4JMB0oSIPkH1omEyalXr9hcRHa6jAMyIaC"
+
+# Telegram
+telegramChatId: "-1011196823328"
+telegramBotToken: "1699923428:AAajsdhHHDChpQ2KJ-fvgj67dasdhbmdNA"
+
+# Discord
+discordGuildId: "720570923482737489"
+discordChannel: "bot-playground"
+discordBotToken: "ODA1KDS7MzkyMDE8TTk0MDE2.UUWNEg.14wlVKNw5ISdAS2zT3N-b0dOIsN"

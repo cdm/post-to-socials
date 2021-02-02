@@ -1,6 +1,6 @@
 # Makefile
 
-IMAGE := docker.pkg.github.com/cdm/post-to-socials/post-to-socials:latest
+IMAGE := post-to-socials
 CONTAINER := post-to-socials
 
 .PHONY: default
@@ -19,8 +19,8 @@ docker_push: docker_build ## Push docker image to github image registry
 	@docker push "${IMAGE}"
 
 #.PHONY: docker_run
-#docker_run: ## Run docker image
-#	@docker run -d --name=${CONTAINER} -p 8333:8333 -v "$${PWD}/csv/auth.csv:/csv/auth.csv" "${IMAGE}" -addr=0.0.0.0:8333 -endpoint=https://server.example.com/send ...
+docker_run: ## Run docker image
+	@docker run -d --name=${CONTAINER} -p 8080:8080 -v "$${PWD}/csv/auth.csv:/csv/auth.csv" -v "$${PWD}/config.yaml:/config.yaml" -v "$${PWD}/form.yaml:/form.html" "${IMAGE}"
 
 .PHONY: docker_stop
 docker_stop: ## Stop docker container
@@ -41,10 +41,10 @@ help: ## Display this help screen
 build: ## Build (dynamic) binary
 	@go build -o post-to-socials .
 
-.PHONY: build-static
-build-static: # Build static binary
-	@env CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o post-to-socials .
+.PHONY: build_static_linux
+build_static_linux: # Build static binary
+	@env GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o post-to-socials .
 
 .PHONY: test
 test: ## Run tests
-	@echo "No tests here."
+	@echo "No tests available."

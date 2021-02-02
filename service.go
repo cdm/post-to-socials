@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -33,11 +32,6 @@ func getAuthHeaders(r *http.Request) (key string, secret string) {
 	k := r.Header.Get("key")
 	s := r.Header.Get("secret")
 	return k, s
-}
-
-func getNanoTime() string {
-	now := time.Now()
-	return fmt.Sprintf("%d", now.UnixNano())
 }
 
 func writeResult(w http.ResponseWriter, status string) {
@@ -140,6 +134,11 @@ func startService(conf ConfigVars, creds map[string]string) {
 	)
 
 	router := mux.NewRouter()
+	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeResult(w, "not_found_error")
+		log.Infof("Route not found: %s - %s - %s - %s - %s - %s",
+			r.Method, r.URL, r.Proto, r.RequestURI, r.RemoteAddr, r.ContentLength)
+	})
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
 	router.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {})
 	router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
