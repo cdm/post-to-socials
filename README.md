@@ -23,14 +23,17 @@ port => Post to socials API service port e.g. "5432"
 
 csv => Path to csv of authentication key/secret pairs e.g. "csv/auth.csv"
 
+twitterEnabled           => true if you want to enable Twitter, false otherwise
 twitterConsumerKey       => Twitter API consumer key e.g. "xgtOU2XljrxBBQuWzkWfe4ebp"
 twitterConsumerSecret    => Twitter API consumer secret e.g. "HMcXX73htvoe73mS2NR2cY9aag3r9D8CmbJtAlMPEfXRD1Qucp" 
 twitterAccessTokenKey    => Twitter API access token e.g. "1355884211619828228-NjPbG8kFxVUxjqMWFsPfS7CKfT3vOM"
 twitterAccessTokenSecret => Twitter API access token secret e.g. "e2E1iLEWGqL1JMB0oQIPsH1omEyalXj9hcRHi6jAMyGaC"
 
+telegramEnabled   => true if you want to enable Telegram, false otherwise
 telegramChatId   => Telegram chat identifier to post to e.g. "-1991156818728"
 telegramBotToken => Telegram bot token e.g. "1441979128:AKKpe6CDKXoChpQ2KJ-fwej6F2qjjhbmdNA"
 
+discordEnabled  => true if you want to enable Discord, false otherwise
 discordGuildId  => Discord guild/server identifier e.g. "120571334818737489"
 discordChannel  => Discord channel to post to e.g. "bot-playground"
 discordBotToken => Discord bot token e.g "XD1MTE2MzkyMDE3NDk0MDE2.YFFNEg.14wlVKNs5ITFgDLzT3N-bffOIsE" 
