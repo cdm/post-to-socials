@@ -17,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/baldator/post-to-socials/connector"
+	"github.com/cdm/post-to-socials/connector"
 )
 
 type Result struct {
@@ -119,6 +119,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 	var discord *connector.Discord
 	var twitter *connector.Twitter
 	var telegram *connector.Telegram
+	var slack *connector.Slack
 
 	if conf.DiscordEnabled {
 		log.Infof("Discord enabled: initializing")
@@ -146,9 +147,9 @@ func startService(conf ConfigVars, creds map[string]string) {
 	}
 	if conf.SlackEnabled {
 		log.Infof("Slack enabled: initializing")
-		slack = connector.NewTSlackConnector(
-			conf.SlackToken,
+		slack = connector.NewSlackConnector(
 			conf.SlackChannelID,
+			conf.SlackToken,
 		)
 	}
 

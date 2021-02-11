@@ -38,7 +38,7 @@ func (s *Slack) Send(msg string) error {
 		slack.MsgOptionAsUser(true), // Add this if you want that the bot would post message as a user, otherwise it will send response using the default slackbot
 	)
 	if err != nil {
-		return errors.Wrap(err, "Could not post text to the Telegram chat")
+		return errors.Wrap(err, "Could not post text to the Slack chat")
 	}
 
 	log.Infof("Message sent to %s at: %s", channelID, timestamp)
