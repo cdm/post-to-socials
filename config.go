@@ -18,6 +18,9 @@ type ConfigVars struct {
 	DiscordGuildID           string `yaml:"discordGuildId" env:"DISCORD-GUILD-ID" env-default:""`
 	DiscordChannel           string `yaml:"discordChannel" env:"DISCORD-CHANNEL" env-default:""`
 	DiscordBotToken          string `yaml:"discordBotToken" env:"DISCORD-TOKEN" env-default:""`
+	SlackEnabled             bool   `yaml:"slackEnabled" env:"SLACK-ENABLE" env-default:"false"`
+	SlackToken               string `yaml:"slackToken" env:"SLACK-TOKEN" env-default:""`
+	SlackChannelID           string `yaml:"slackChannelID" env:"SLACK-CHANNEL-ID" env-default:""`
 }
 
 //"config.yml"

@@ -22,3 +22,8 @@ discordEnabled: true
 discordGuildId: "720570923482737489"
 discordChannel: "bot-playground"
 discordBotToken: "ODA1KDS7MzkyMDE8TTk0MDE2.UUWNEg.14wlVKNw5ISdAS2zT3N-b0dOIsN"
+
+# Slack
+slackEnabled: true
+slackToken: "xoxb-2362329890-1740543847717-pXZPr0DwOMTNdN0uzfwVa05I"
+slackChannelID: "C02AN9PSE"

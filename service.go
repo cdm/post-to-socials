@@ -17,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cdm/post-to-socials/connector"
+	"github.com/baldator/post-to-socials/connector"
 )
 
 type Result struct {
@@ -144,6 +144,13 @@ func startService(conf ConfigVars, creds map[string]string) {
 			conf.TelegramChatIdentifier,
 		)
 	}
+	if conf.SlackEnabled {
+		log.Infof("Slack enabled: initializing")
+		slack = connector.NewTSlackConnector(
+			conf.SlackToken,
+			conf.SlackChannelID,
+		)
+	}
 
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -198,6 +205,21 @@ func startService(conf ConfigVars, creds map[string]string) {
 			}
 		})
 	}
+	if conf.SlackEnabled {
+		router.HandleFunc("/send/slack", func(w http.ResponseWriter, r *http.Request) {
+			log.Info("/send/slack")
+			valid, msg := validate(w, r, creds)
+			if valid {
+				err := slack.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Slack: %s", err.Error())
+					writeResult(w, "send_error")
+				} else {
+					writeResult(w, "success")
+				}
+			}
+		})
+	}
 	router.HandleFunc("/send/all", func(w http.ResponseWriter, r *http.Request) {
 		log.Info("/send/all")
 		valid, msg := validate(w, r, creds)
@@ -228,6 +250,14 @@ func startService(conf ConfigVars, creds map[string]string) {
 				}
 				err = nil
 			}
+			if conf.SlackEnabled {
+				err = slack.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Slack: %s", err.Error())
+					errors++
+				}
+				err = nil
+			}
 			if errors > 0 {
 				writeResult(w, "send_error")
 			} else {
@@ -243,6 +273,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			discord := r.FormValue("discord")
 			twitter := r.FormValue("twitter")
 			telegram := r.FormValue("telegram")
+			slack := r.FormValue("slack")
 
 			if len(discord) == 0 && len(twitter) == 0 && len(telegram) == 0 {
 				writeResult(w, "network_required_error")
@@ -282,6 +313,16 @@ func startService(conf ConfigVars, creds map[string]string) {
 				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/telegram")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to telegram endpoint on service"))
+					writeResult(w, "post_error")
+					return
+				}
+				responseContent = body
+			}
+
+			if len(slack) > 0 && slack == "slack" {
+				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/slack")
+				if err != nil {
+					log.Error(errors.Wrap(err, "Error posting to slack endpoint on service"))
 					writeResult(w, "post_error")
 					return
 				}
