@@ -90,7 +90,7 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 	return true, m.Msg
 }
 
-func postMessage(key string, secret string, msg string, path string) (error, string) {
+func postMessage(key string, secret string, msg string, path string) (string, error) {
 	var jsonStr = []byte(`{"message":"` + msg + `"}`)
 	req, err := http.NewRequest("POST", "http://"+path, bytes.NewBuffer(jsonStr))
 	req.Header.Set("key", key)
@@ -99,7 +99,7 @@ func postMessage(key string, secret string, msg string, path string) (error, str
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -111,96 +111,153 @@ func postMessage(key string, secret string, msg string, path string) (error, str
 		}
 		body = string(bodyBytes)
 	}
-	return nil, body
+	return body, nil
 }
 
 func startService(conf ConfigVars, creds map[string]string) {
 	log.Infof("Starting post-to-socials API service (%s:%s)", conf.Host, conf.Port)
+	var discord *connector.Discord
+	var twitter *connector.Twitter
+	var telegram *connector.Telegram
+	var slack *connector.Slack
 
-	discord := connector.NewDiscordConnector(
-		conf.DiscordChannel,
-		conf.DiscordBotToken,
-		conf.DiscordGuildID,
-	)
-	twitter := connector.NewTwitterConnector(
-		conf.TwitterConsumerKey,
-		conf.TwitterConsumerSecret,
-		conf.TwitterAccessTokenKey,
-		conf.TwitterAccessTokenSecret,
-	)
-	telegram := connector.NewTelegramConnector(
-		conf.TelegramBotToken,
-		conf.TelegramChatIdentifier,
-	)
+	if conf.DiscordEnabled {
+		log.Infof("Discord enabled: initializing")
+		discord = connector.NewDiscordConnector(
+			conf.DiscordChannel,
+			conf.DiscordBotToken,
+			conf.DiscordGuildID,
+		)
+	}
+	if conf.TwitterEnabled {
+		log.Infof("Twitter enabled: initializing")
+		twitter = connector.NewTwitterConnector(
+			conf.TwitterConsumerKey,
+			conf.TwitterConsumerSecret,
+			conf.TwitterAccessTokenKey,
+			conf.TwitterAccessTokenSecret,
+		)
+	}
+	if conf.TelegramEnabled {
+		log.Infof("Telegram enabled: initializing")
+		telegram = connector.NewTelegramConnector(
+			conf.TelegramBotToken,
+			conf.TelegramChatIdentifier,
+		)
+	}
+	if conf.SlackEnabled {
+		log.Infof("Slack enabled: initializing")
+		slack = connector.NewSlackConnector(
+			conf.SlackChannelID,
+			conf.SlackToken,
+		)
+	}
 
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writeResult(w, "not_found_error")
 		log.Infof("Route not found: %s - %s - %s - %s - %s - %s",
-			r.Method, r.URL, r.Proto, r.RequestURI, r.RemoteAddr, r.ContentLength)
+			r.Method, r.URL, r.Proto, r.RequestURI, r.RemoteAddr, string(r.ContentLength))
 	})
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
 	router.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {})
-	router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
-		log.Info("/send/twitter")
-		valid, msg := validate(w, r, creds)
-		if valid {
-			err := twitter.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Twitter: %s", err.Error())
-				writeResult(w, "send_error")
-			} else {
-				writeResult(w, "success")
+	if conf.TwitterEnabled {
+		router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
+			log.Info("/send/twitter")
+			valid, msg := validate(w, r, creds)
+			if valid {
+				err := twitter.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Twitter: %s", err.Error())
+					writeResult(w, "send_error")
+				} else {
+					writeResult(w, "success")
+				}
 			}
-		}
-	})
-	router.HandleFunc("/send/discord", func(w http.ResponseWriter, r *http.Request) {
-		log.Info("/send/discord")
-		valid, msg := validate(w, r, creds)
-		if valid {
-			err := discord.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Discord: %s", err.Error())
-				writeResult(w, "send_error")
-			} else {
-				writeResult(w, "success")
+		})
+	}
+	if conf.DiscordEnabled {
+		router.HandleFunc("/send/discord", func(w http.ResponseWriter, r *http.Request) {
+			log.Info("/send/discord")
+			valid, msg := validate(w, r, creds)
+			if valid {
+				err := discord.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Discord: %s", err.Error())
+					writeResult(w, "send_error")
+				} else {
+					writeResult(w, "success")
+				}
 			}
-		}
-	})
-	router.HandleFunc("/send/telegram", func(w http.ResponseWriter, r *http.Request) {
-		log.Info("/send/telegram")
-		valid, msg := validate(w, r, creds)
-		if valid {
-			err := telegram.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Telegram: %s", err.Error())
-				writeResult(w, "send_error")
-			} else {
-				writeResult(w, "success")
+		})
+	}
+	if conf.TelegramEnabled {
+		router.HandleFunc("/send/telegram", func(w http.ResponseWriter, r *http.Request) {
+			log.Info("/send/telegram")
+			valid, msg := validate(w, r, creds)
+			if valid {
+				err := telegram.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Telegram: %s", err.Error())
+					writeResult(w, "send_error")
+				} else {
+					writeResult(w, "success")
+				}
 			}
-		}
-	})
+		})
+	}
+	if conf.SlackEnabled {
+		router.HandleFunc("/send/slack", func(w http.ResponseWriter, r *http.Request) {
+			log.Info("/send/slack")
+			valid, msg := validate(w, r, creds)
+			if valid {
+				err := slack.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Slack: %s", err.Error())
+					writeResult(w, "send_error")
+				} else {
+					writeResult(w, "success")
+				}
+			}
+		})
+	}
 	router.HandleFunc("/send/all", func(w http.ResponseWriter, r *http.Request) {
 		log.Info("/send/all")
 		valid, msg := validate(w, r, creds)
 		if valid {
 			errors := 0
-			err := discord.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Discord: %s", err.Error())
-				errors++
+			var err error
+			if conf.DiscordEnabled {
+				err = discord.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Discord: %s", err.Error())
+					errors++
+				}
+				err = nil
 			}
-			err = nil
-			err = telegram.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Telegram: %s", err.Error())
-				errors++
+			if conf.TelegramEnabled {
+				err = telegram.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Telegram: %s", err.Error())
+					errors++
+				}
+				err = nil
 			}
-			err = nil
-			err = twitter.Send(msg)
-			if err != nil {
-				log.Errorf("Error sending msg to Twitter: %s", err.Error())
-				errors++
+			if conf.TwitterEnabled {
+				err = twitter.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Twitter: %s", err.Error())
+					errors++
+				}
+				err = nil
+			}
+			if conf.SlackEnabled {
+				err = slack.Send(msg)
+				if err != nil {
+					log.Errorf("Error sending msg to Slack: %s", err.Error())
+					errors++
+				}
+				err = nil
 			}
 			if errors > 0 {
 				writeResult(w, "send_error")
@@ -217,6 +274,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			discord := r.FormValue("discord")
 			twitter := r.FormValue("twitter")
 			telegram := r.FormValue("telegram")
+			slack := r.FormValue("slack")
 
 			if len(discord) == 0 && len(twitter) == 0 && len(telegram) == 0 {
 				writeResult(w, "network_required_error")
@@ -233,7 +291,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 
 			responseContent := ""
 			if len(discord) > 0 && discord == "discord" {
-				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/discord")
+				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/discord")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to Discord endpoint on service"))
 					writeResult(w, "post_error")
@@ -243,7 +301,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			}
 
 			if len(twitter) > 0 && twitter == "twitter" {
-				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/twitter")
+				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/twitter")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to Twitter endpoint on service"))
 					writeResult(w, "post_error")
@@ -253,9 +311,19 @@ func startService(conf ConfigVars, creds map[string]string) {
 			}
 
 			if len(telegram) > 0 && telegram == "telegram" {
-				err, body := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/telegram")
+				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/telegram")
 				if err != nil {
 					log.Error(errors.Wrap(err, "Error posting to telegram endpoint on service"))
+					writeResult(w, "post_error")
+					return
+				}
+				responseContent = body
+			}
+
+			if len(slack) > 0 && slack == "slack" {
+				body, err := postMessage(key, secret, message, conf.Host+":"+conf.Port+"/send/slack")
+				if err != nil {
+					log.Error(errors.Wrap(err, "Error posting to slack endpoint on service"))
 					writeResult(w, "post_error")
 					return
 				}
@@ -290,9 +358,11 @@ func startService(conf ConfigVars, creds map[string]string) {
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		derr := discord.Start()
-		if derr != nil {
-			log.Warn(derr)
+		if conf.DiscordEnabled {
+			derr := discord.Start()
+			if derr != nil {
+				log.Warn(derr)
+			}
 		}
 		if err := srv.ListenAndServe(); err != nil {
 			log.Warn(err)
@@ -312,7 +382,9 @@ func startService(conf ConfigVars, creds map[string]string) {
 	defer cancel()
 
 	// Signal to stop the discord connector
-	discord.Stop()
+	if conf.DiscordEnabled {
+		discord.Stop()
+	}
 
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
