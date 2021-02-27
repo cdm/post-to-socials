@@ -84,7 +84,7 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 	return true, m.Msg
 }
 
-func validateTwitter(w http.ResponseWriter, r *http.Request, creds map[string]string) bool {
+func validateTwitter(w http.ResponseWriter, r *http.Request) bool {
 	decoder := json.NewDecoder(r.Body)
 	var m SendMessage
 	err := decoder.Decode(&m)
@@ -178,7 +178,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 		router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
 			log.Info("/send/twitter")
 			valid, msg := validate(w, r, creds)
-			validTwitter := validateTwitter(w, r, creds)
+			validTwitter := validateTwitter(w, r)
 			if valid && validTwitter {
 				err := twitter.Send(msg)
 				if err != nil {
@@ -258,7 +258,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 				err = nil
 			}
 			if conf.TwitterEnabled {
-				validTwitter := validateTwitter(w, r, creds)
+				validTwitter := validateTwitter(w, r)
 				if validTwitter {
 					err = twitter.Send(msg)
 					if err != nil {
