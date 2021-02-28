@@ -81,7 +81,6 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 		return false, ""
 	}
 
-	log.Info("valid message: " + m.Msg)
 	return true, m.Msg
 }
 
@@ -92,9 +91,7 @@ func validateTwitter(w http.ResponseWriter, m string) bool {
 		writeResult(w, "json_error")
 		return false
 	}
-
-	log.Info("valid Twitter message")
-	return false
+	return true
 }
 
 func postMessage(key string, secret string, msg string, path string) (string, error) {
