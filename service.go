@@ -81,25 +81,19 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 		return false, ""
 	}
 
+	log.Info("valid message: " + m.Msg)
 	return true, m.Msg
 }
 
-func validateTwitter(w http.ResponseWriter, r *http.Request) bool {
-	decoder := json.NewDecoder(r.Body)
-	var m SendMessage
-	err := decoder.Decode(&m)
-	if err != nil {
-		log.Errorf("Error decoding msg body: %s", err.Error())
+func validateTwitter(w http.ResponseWriter, m string) bool {
+
+	if len(m) > 140 || len(m) == 0 {
+		log.Errorf("Error msg body is out of range: %d >> '%s'", len(m), m)
 		writeResult(w, "json_error")
 		return false
 	}
 
-	if len(m.Msg) > 140 || len(m.Msg) == 0 {
-		log.Errorf("Error msg body is out of range: %d >> '%s'", len(m.Msg), m.Msg)
-		writeResult(w, "json_error")
-		return false
-	}
-
+	log.Info("valid Twitter message")
 	return false
 }
 
@@ -178,7 +172,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 		router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
 			log.Info("/send/twitter")
 			valid, msg := validate(w, r, creds)
-			validTwitter := validateTwitter(w, r)
+			validTwitter := validateTwitter(w, msg)
 			if valid && validTwitter {
 				err := twitter.Send(msg)
 				if err != nil {
@@ -258,7 +252,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 				err = nil
 			}
 			if conf.TwitterEnabled {
-				validTwitter := validateTwitter(w, r)
+				validTwitter := validateTwitter(w, msg)
 				if validTwitter {
 					err = twitter.Send(msg)
 					if err != nil {
