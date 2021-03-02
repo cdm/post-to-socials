@@ -70,11 +70,11 @@ Please see the different API methods in the next section for your choice of netw
 
 | Method     | Location                               | Description                               |
 | :--------- | :------------------------------------- | :---------------------------------------- |
-| `POST`     | `/send/discord`    | Send a Discord message to the guild/channel specified in the config file. |
-| `POST`     | `/send/telegram`   | Send a Telegram message to the chat ID specified in the config file. |
-| `POST`     | `/send/slack`      | Send a Slack message to the channel specified in the config file. |
+| `POST`     | `/send/discord`    | Send a Discord message (max 3000 chars) to the guild/channel specified in the config file. |
+| `POST`     | `/send/telegram`   | Send a Telegram message (max 3000 chars) to the chat ID specified in the config file. |
+| `POST`     | `/send/slack`      | Send a Slack message (max 3000 chars) to the channel specified in the config file. |
 | `POST`     | `/send/twitter`    | Send a Twitter message (max 140 chars) to the profile specified (API keys) in the config file. |
-| `POST`     | `/send/all`        | Send a message to all three social channels in one go! |
+| `POST`     | `/send/all`        | Send a message (max 140 chars) to all three social channels in one go! |
 | `GET`      | `/send`            | Display a helpful web form to test credentials and send messages manually. See below. |
 
 ### Test form
