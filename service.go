@@ -81,13 +81,17 @@ func validate(w http.ResponseWriter, r *http.Request, creds map[string]string) (
 		return false, ""
 	}
 
-	if len(m.Msg) > 140 || len(m.Msg) == 0 {
-		log.Errorf("Error msg body is out of range: %d >> '%s'", len(m.Msg), m.Msg)
-		writeResult(w, "json_error")
-		return false, ""
-	}
-
 	return true, m.Msg
+}
+
+func validateTwitter(w http.ResponseWriter, m string) bool {
+
+	if len(m) > 140 || len(m) == 0 {
+		log.Errorf("Error msg body is out of range: %d >> '%s'", len(m), m)
+		writeResult(w, "json_error")
+		return false
+	}
+	return true
 }
 
 func postMessage(key string, secret string, msg string, path string) (string, error) {
@@ -165,7 +169,8 @@ func startService(conf ConfigVars, creds map[string]string) {
 		router.HandleFunc("/send/twitter", func(w http.ResponseWriter, r *http.Request) {
 			log.Info("/send/twitter")
 			valid, msg := validate(w, r, creds)
-			if valid {
+			validTwitter := validateTwitter(w, msg)
+			if valid && validTwitter {
 				err := twitter.Send(msg)
 				if err != nil {
 					log.Errorf("Error sending msg to Twitter: %s", err.Error())
@@ -244,12 +249,15 @@ func startService(conf ConfigVars, creds map[string]string) {
 				err = nil
 			}
 			if conf.TwitterEnabled {
-				err = twitter.Send(msg)
-				if err != nil {
-					log.Errorf("Error sending msg to Twitter: %s", err.Error())
-					errors++
+				validTwitter := validateTwitter(w, msg)
+				if validTwitter {
+					err = twitter.Send(msg)
+					if err != nil {
+						log.Errorf("Error sending msg to Twitter: %s", err.Error())
+						errors++
+					}
+					err = nil
 				}
-				err = nil
 			}
 			if conf.SlackEnabled {
 				err = slack.Send(msg)

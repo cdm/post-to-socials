@@ -29,7 +29,7 @@ twitterConsumerSecret    => Twitter API consumer secret e.g. "HMcXX73htvoe73mS2N
 twitterAccessTokenKey    => Twitter API access token e.g. "1355884211619828228-NjPbG8kFxVUxjqMWFsPfS7CKfT3vOM"
 twitterAccessTokenSecret => Twitter API access token secret e.g. "e2E1iLEWGqL1JMB0oQIPsH1omEyalXj9hcRHi6jAMyGaC"
 
-telegramEnabled   => true if you want to enable Telegram, false otherwise
+telegramEnabled  => true if you want to enable Telegram, false otherwise
 telegramChatId   => Telegram chat identifier to post to e.g. "-1991156818728"
 telegramBotToken => Telegram bot token e.g. "1441979128:AKKpe6CDKXoChpQ2KJ-fwej6F2qjjhbmdNA"
 
@@ -37,6 +37,10 @@ discordEnabled  => true if you want to enable Discord, false otherwise
 discordGuildId  => Discord guild/server identifier e.g. "120571334818737489"
 discordChannel  => Discord channel to post to e.g. "bot-playground"
 discordBotToken => Discord bot token e.g "XD1MTE2MzkyMDE3NDk0MDE2.YFFNEg.14wlVKNs5ITFgDLzT3N-bffOIsE" 
+
+slackEnabled    => true if you want to enable Slack, false otherwise
+slackToken      => Slack token
+slackChannelID  => Slack channel ID
 ```
 
 To help with deployment on cloud hosting providers, the config also supports Environment (ENV) variables. 
@@ -66,8 +70,9 @@ Please see the different API methods in the next section for your choice of netw
 
 | Method     | Location                               | Description                               |
 | :--------- | :------------------------------------- | :---------------------------------------- |
-| `POST`     | `/send/discord`    | Send a Discord message (max 140 chars) to the guild/channel specified in the config file. |
-| `POST`     | `/send/telegram`   | Send a Telegram message (max 140 chars) to the chat ID specified in the config file. |
+| `POST`     | `/send/discord`    | Send a Discord message to the guild/channel specified in the config file. |
+| `POST`     | `/send/telegram`   | Send a Telegram message to the chat ID specified in the config file. |
+| `POST`     | `/send/slack`      | Send a Slack message to the channel specified in the config file. |
 | `POST`     | `/send/twitter`    | Send a Twitter message (max 140 chars) to the profile specified (API keys) in the config file. |
 | `POST`     | `/send/all`        | Send a message to all three social channels in one go! |
 | `GET`      | `/send`            | Display a helpful web form to test credentials and send messages manually. See below. |
