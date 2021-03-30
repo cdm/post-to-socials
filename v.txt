@@ -10,5 +10,17 @@
   {
     "party_id": "eaa2dd789b85c43e8a19c7f11e5124416de43608594008502a40181b85dd90ec",
     "twitter_handle": "w3nm00n2"
+  },
+  {
+    "party_id": "9ebac02a739f5f4253a35cc4eed25a76e8ac88546d3c5270797087bdcba9cf08", 
+    "twitter_handle": "wendy010203"
+  }, 
+  {
+    "party_id": "75b5b97f27d13a6de2245e0cf56aa1c865f2678a6d24f1675e95486ee2a6d31e", 
+    "twitter_handle": "campbellssource"
+  }, 
+  {
+    "party_id": "7c03c4965a46799765fa2e025c5c541ba678970133987220dcbb8e582d1b5ad2", 
+    "twitter_handle": "what_is_vega"
   }
 ]
