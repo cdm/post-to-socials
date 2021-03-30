@@ -1,0 +1,14 @@
+[
+  {
+    "party_id": "ac9d9fe2e5904308d9c0f6fe758f8a4f4dd9636ab35584f95909010b7ec7edc9",
+    "twitter_handle": "c7berfish"
+  },
+  {
+    "party_id": "75b5b97f27d13a6de2245e0cf56aa1c865f2678a6d24f1675e95486ee2a6d31e",
+    "twitter_handle": "RJ_Simmonds"
+  },
+  {
+    "party_id": "eaa2dd789b85c43e8a19c7f11e5124416de43608594008502a40181b85dd90ec",
+    "twitter_handle": "w3nm00n2"
+  }
+]
