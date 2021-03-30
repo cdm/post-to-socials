@@ -43,7 +43,7 @@ build: ## Build (dynamic) binary
 
 .PHONY: build_static_linux
 build_static_linux: # Build static binary
-	@env GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o post-to-socials .
+	@env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o post-to-socials .
 
 .PHONY: test
 test: ## Run tests
