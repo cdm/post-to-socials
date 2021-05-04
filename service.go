@@ -283,7 +283,7 @@ func startService(conf ConfigVars, creds map[string]string) {
 			telegram := r.FormValue("telegram")
 			slack := r.FormValue("slack")
 
-			if len(discord) == 0 && len(twitter) == 0 && len(telegram) == 0 {
+			if len(discord) == 0 && len(twitter) == 0 && len(telegram) == 0 && len(slack) == 0 {
 				writeResult(w, "network_required_error")
 				return
 			}
